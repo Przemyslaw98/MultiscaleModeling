@@ -1,0 +1,120 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cpp}
+decl {\#include <FL/Fl_Image.H>} {private local
+}
+
+decl {\#include <cmath>} {private local
+}
+
+Function {main()} {open return_type int
+} {
+  Fl_Window window_main {
+    label {1D Automats} open
+    xywh {380 150 380 240} type Double size_range {380 240 380 240} visible
+  } {
+    Fl_Value_Input input_size {
+      label {Size:}
+      xywh {40 16 32 32}
+    }
+    Fl_Value_Input input_iterations {
+      label {Iterations:}
+      xywh {160 16 32 32}
+    }
+    Fl_Value_Input input_rule {
+      label {Rule:}
+      xywh {240 16 32 32}
+    }
+    Fl_Button btn_run {
+      label Run
+      callback callback_run selected
+      xywh {288 16 80 32}
+    }
+    Fl_Box result {
+      xywh {0 56 380 184} box FLAT_BOX color 7
+    }
+  }
+  code {window_main->show();
+  return Fl::run();} {}
+}
+
+Function {callback_run()} {open
+} {
+  code {int x,y;
+  if(input_size->value()>=380)
+  x=input_size->value();
+  else x=380;
+  if(input_iterations->value()>=184)
+  y=input_iterations->value();
+  else y=184;
+  result->resize(0,56,input_size->value(),input_iterations->value());
+  window_main->resize(window_main->x_root(),window_main->y_root(),x,y+56);
+  draw_image(result,input_size->value(),input_iterations->value(),input_rule->value());
+  window_main->redraw();} {}
+}
+
+Function {solve_rule(int rule)} {open return_type {int*}
+} {
+  code {int w=7;
+  int* outcome=new int[8];
+  for(int i=0;i<8;i++){
+    if(pow(2,w)<=rule){
+      rule-=pow(2,w);
+      outcome[i]=1;
+    }
+    else outcome[i]=0;
+    w--;
+  }
+  return outcome;} {}
+}
+
+Function {to_decimal(int bin)} {open return_type int
+} {
+  code {int outcome=0;
+  int w=0;
+  while(bin>0){
+    outcome+=bin%10*pow(2,w);
+    bin/=10;
+    w++;
+  }
+  return outcome;} {}
+}
+
+Function {draw_image(Fl_Box* canvas, int size, int iterations,int rule)} {open return_type void
+} {
+  code {int* ruleArray=solve_rule(rule);
+  int* space=new int[size];
+
+  int** outcome=new int*[iterations];
+  for(int i=0;i<iterations;i++)
+    outcome[i]=new int[size];
+
+  for(int i=0;i<size;i++)
+    outcome[0][i]=0;
+  outcome[0][size/2]=1;
+  for(int i=1;i<iterations;i++)
+    for(int j=0;j<size;j++){
+      int bin=100*outcome[i-1][(j+size-1)%size]+10*outcome[i-1][j]+outcome[i-1][(j+1)%size];
+      int dec=to_decimal(bin);
+      outcome[i][j]=ruleArray[7-dec];
+    }
+
+  unsigned char* image_data=new unsigned char[size*iterations*4];
+  for(int i=0;i<iterations;i++)
+    for(int j=0;j<size;j++){
+      if(outcome[i][j]==1){
+        image_data[(i*size+j)*4]=0;
+        image_data[(i*size+j)*4+1]=0;
+        image_data[(i*size+j)*4+2]=0;
+      }
+      else{
+        image_data[(i*size+j)*4]=255;
+        image_data[(i*size+j)*4+1]=255;
+        image_data[(i*size+j)*4+2]=255;
+      }
+      image_data[(i*size+j)*4+3]=255;
+    }
+  Fl_Image *image=new Fl_RGB_Image(image_data,size,iterations,4,0);
+  result->image(image);} {}
+}
