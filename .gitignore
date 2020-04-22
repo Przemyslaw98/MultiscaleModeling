@@ -1,10 +1,16 @@
 CA_1D/obj
+CA_2D/obj
+CA_Crystalization/obj
 CA_1D/Multiscale.depend
 CA_1D/Multiscale.layout
-CA_2D/obj
 CA_2D/Multiscale.depend
 CA_2D/Multiscale.layout
 CA_2D/Multiscale.cbp
 CA_2D/main.fld
+
+CA_Crystalization/Multiscale.depend
+CA_Crystalization/Multiscale.layout
+CA_Crystalization/Multiscale.cbp
+CA_Crystalization/main.fld
 
 
